@@ -12,7 +12,7 @@ class LocationsController < ApplicationController
   end
 
   def create
-    location = current_user.locations.create(location_params)
+    location = Location.create(location_params)
     render json: location, status: 200
   end
 
@@ -29,10 +29,11 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.require(:location).permit(:name, :description, :tagline, :address, :latitude, :longitude)
+    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude)
   end
 
   def set_location
     @location = location.find(params[:id])
   end
 end
+
