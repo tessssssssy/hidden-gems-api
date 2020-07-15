@@ -1,3 +1,6 @@
+Location.destroy_all
+User.destroy_all
+
 Location.create(
   name: "Hosier Lane Graffiti",
   tagline: "Best street art in Melbourne CBD",
@@ -28,10 +31,12 @@ Location.create(
 
 User.create(
   email: "test1@hg.com",
-  password: "123456"
+  password: "123456",
+  admin: true
 )
 
 User.create(
   email: "test2@hg.com",
-  password: "123456"
+  password: "123456",
+  admin: true
 )
