@@ -3,7 +3,7 @@ class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
-    @locations = location.all.order(id: "desc")
+    @locations = Location.all.order(id: "desc")
     render json: @locations
   end
 
