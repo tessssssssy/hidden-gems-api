@@ -30,12 +30,14 @@ Location.create(
 )
 
 User.create(
+  username: "test1",
   email: "test1@hg.com",
   password: "123456",
   admin: true
 )
 
 User.create(
+  username: "test2",
   email: "test2@hg.com",
   password: "123456",
   admin: true
