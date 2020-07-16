@@ -36,4 +36,3 @@ class LocationsController < ApplicationController
     @location = location.find(params[:id])
   end
 end
-
