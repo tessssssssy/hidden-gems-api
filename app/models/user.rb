@@ -6,4 +6,9 @@ class User < ApplicationRecord
     username = request.params["auth"] && request.params["auth"]["username"]
     self.find_by(username: username)
   end
+  has_many :comments
+  has_many :likes
+  has_many :ratings
 end
+
+
