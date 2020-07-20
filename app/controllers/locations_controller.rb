@@ -1,10 +1,10 @@
 class LocationsController < ApplicationController
-#     before_action :authenticate_user, only: [:create, :update, :destroy]
+  before_action :authenticate_user, only: [:create, :update, :destroy]
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
     @locations = Location.all.order(id: "desc")
-    render json: @locations
+    render json: @locations, status: 200
   end
 
   def show
@@ -12,18 +12,25 @@ class LocationsController < ApplicationController
   end
 
   def create
-    location = Location.create(location_params)
-    render json: location, status: 200
+    location = Location.new(location_params)
+    if location.save
+      render json: location, status: :created
+    else
+      render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def update
-    @location.update(location_params)
-    render json: "location updated", status: 200
-  end
-
+    if @location.update(location_params)
+      render json: "location updated", status: :no_content
+    else
+      render json: { errors: @location.errors.full_messages },
+             status: :unprocessable_entity
+    end
+  end  
   def destroy
     @location.destroy
-    render json: "location deleted", status: 200
+    render json: "location deleted", status: :no_content
   end
 
   private
