@@ -1,5 +1,5 @@
 class LocationsController < ApplicationController
-  before_action :authenticate_user, only: [:create, :update, :destroy]
+  # before_action :authenticate_user, only: [:create, :update, :destroy]
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
@@ -8,7 +8,11 @@ class LocationsController < ApplicationController
   end
 
   def show
-    render json: @location
+    raw = Comment.includes(:user).where(location_id: @location.id)
+    comments = raw.map do |c|
+      {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+    end
+    render json: {location: @location, comments: comments}
   end
 
   def create

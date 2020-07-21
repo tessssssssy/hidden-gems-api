@@ -42,3 +42,16 @@ User.create(
   password: "123456",
   admin: true
 )
+
+Comment.create(
+  user_id: 1,
+  location_id: 1,
+  body: "this is such a beautiful place"
+)
+
+Comment.create(
+  user_id: 2,
+  location_id: 1,
+  body: "I know, right?",
+  thread_id: 1
+)
