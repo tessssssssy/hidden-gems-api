@@ -36,7 +36,7 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude)
+    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude, :image)
   end
 
   def set_location
