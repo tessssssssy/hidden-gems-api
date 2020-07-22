@@ -1,6 +1,6 @@
 class CommentsController < ApplicationController
   before_action :authenticate_user, only: [:create, :update, :destroy]
-  before_action :set_comment, only: [:update, :destroy]
+  before_action :set_comment, only: [:show, :update, :destroy]
 
   def index
     rawComment = Comment.includes(:user).where(location_id: params[:location_id])
@@ -12,6 +12,10 @@ class CommentsController < ApplicationController
       end
     end
     render json: comments, status: 200
+  end
+
+  def show
+    render json: @comment, status: 200
   end
 
   def create
