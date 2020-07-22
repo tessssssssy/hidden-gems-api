@@ -1,5 +1,5 @@
 class LocationsController < ApplicationController
-  before_action :authenticate_user, only: [:create, :update, :destroy]
+  # before_action :authenticate_user, only: [:create, :update, :destroy]
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
@@ -37,7 +37,11 @@ class LocationsController < ApplicationController
   def create
     location = Location.new(location_params)
     if location.save
-      render json: location, status: :created
+      if location_params[:image]
+        render json: { location: location, image: url_for(location.image) }, status: :created
+      else
+        render json: { location: location, image: '' }, status: :created
+      end
     else
       render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
     end
@@ -59,10 +63,20 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude)
+    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude, :image)
   end
 
   def set_location
     @location = Location.find(params[:id])
+  end
+
+  def generate_image_urls(locations)
+    locations.map do |location|
+      if location.image.attached?
+        location.attributes.merge(image: url_for(location.image))
+      else
+        location
+      end
+    end
   end
 end
