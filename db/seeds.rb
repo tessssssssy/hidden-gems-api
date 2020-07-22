@@ -1,3 +1,5 @@
+Rating.destroy_all
+Comment.destroy_all
 Location.destroy_all
 User.destroy_all
 
@@ -32,14 +34,14 @@ Location.create(
 User.create(
   username: "test1",
   email: "test1@hg.com",
-  password: "123456",
+  password: "password",
   admin: true
 )
 
 User.create(
   username: "test2",
   email: "test2@hg.com",
-  password: "123456",
+  password: "password",
   admin: true
 )
 
@@ -54,4 +56,16 @@ Comment.create(
   location_id: 1,
   body: "I know, right?",
   thread_id: 1
+)
+
+Rating.create(
+  user_id: 1,
+  location_id: 1,
+  stars: 4
+)
+
+Rating.create(
+  user_id: 2,
+  location_id: 1,
+  stars: 2
 )

@@ -3,7 +3,14 @@ class CommentsController < ApplicationController
   before_action :set_comment, only: [:update, :destroy]
 
   def index
-    comments = Comment.where(location_id: params[:location_id])
+    rawComment = Comment.includes(:user).where(location_id: params[:location_id])
+    if rawComment.length==0 
+      comments = [0]
+    else 
+      comments = rawComment.map do |c|
+        {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+      end
+    end
     render json: comments, status: 200
   end
 
