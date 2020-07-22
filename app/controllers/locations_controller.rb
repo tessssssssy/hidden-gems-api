@@ -5,19 +5,22 @@ class LocationsController < ApplicationController
   def index
     rawLocation = Location.all.order(id: "desc").includes(:ratings)
     @locations = rawLocation.map do |l|
-      {id: l.id, name: l.name, description: l.description, tagline: l.tagline, address: l.address, longitude: l.longitude, latitude: l.latitude, ratings: l.ratings.average(:stars).to_i}
+      location = l.as_json
+      location = location.merge({ratings: l.ratings.average(:stars).to_i})
     end
     render json: @locations, status: 200
   end
 
   def show
-    location = {id: @location.id, name: @location.name, description: @location.description, tagline: @location.tagline, address: @location.address, longitude: @location.longitude, latitude: @location.latitude, ratings: @location.ratings.average(:stars).to_i}
+    location = @location.as_json
+    location = location.merge({ratings: @location.ratings.average(:stars).to_i})
     rawComment = Comment.includes(:user).where(location_id: @location.id)
     if rawComment.length==0 
       comments = [0]
     else 
       comments = rawComment.map do |c|
-        {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+        comment = c.as_json
+        comment = comment.merge({username: c.user.username})
       end
     end
     render json: {location: location, comments: comments}, status: 200
