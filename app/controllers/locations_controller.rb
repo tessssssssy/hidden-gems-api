@@ -8,6 +8,8 @@ class LocationsController < ApplicationController
   end
 
   def show
+    p @location.image.service_url
+    p @location
     render json: @location
   end
 
