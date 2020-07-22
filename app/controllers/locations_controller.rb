@@ -1,18 +1,25 @@
 class LocationsController < ApplicationController
-  # before_action :authenticate_user, only: [:create, :update, :destroy]
+  before_action :authenticate_user, only: [:create, :update, :destroy]
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
-    @locations = Location.all.order(id: "desc")
+    rawData = Location.all.order(id: "desc").includes(:ratings)
+    @locations = rawData.map do |l|
+      {id: l.id, name: l.name, description: l.description, tagline: l.tagline, address: l.address, longitude: l.longitude, latitude: l.latitude, ratings: l.ratings.average(:stars).to_i}
+    end
     render json: @locations, status: 200
   end
 
   def show
-    raw = Comment.includes(:user).where(location_id: @location.id)
-    comments = raw.map do |c|
-      {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+    rawData = Comment.includes(:user).where(location_id: @location.id)
+    if rawData.length==0 
+      comments = [0]
+    else 
+      comments = rawData.map do |c|
+        {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+      end
     end
-    render json: {location: @location, comments: comments}
+    render json: {location: @location, comments: comments}, status: 200
   end
 
   def create
@@ -26,7 +33,7 @@ class LocationsController < ApplicationController
 
   def update
     if @location.update(location_params)
-      render json: "location updated", status: :no_content
+      render json: "location updated", status: :ok
     else
       render json: { errors: @location.errors.full_messages },
              status: :unprocessable_entity
@@ -34,7 +41,7 @@ class LocationsController < ApplicationController
   end  
   def destroy
     @location.destroy
-    render json: "location deleted", status: :no_content
+    render json: "location deleted", status: :ok
   end
 
   private
