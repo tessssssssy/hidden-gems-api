@@ -3,13 +3,36 @@ class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
-    @locations = Location.all.with_attached_image #order(id: "desc")
-    render json: generate_image_urls(@locations) 
+    rawLocation = Location.all.order(id: "desc").includes(:ratings).with_attached_image
+    @locations = rawLocation.map do |l|
+      location = l.as_json
+      location = location.merge({ratings: l.ratings.average(:stars).to_i})
+      if l.image.attached?
+        location = location.merge({image: l.image.service_url})
+      end
+      location
+    end
+    render json: @locations, status: 200
   end
 
   def show
-    render json: @location
+    location = @location.as_json
+    location = location.merge({ratings: @location.ratings.average(:stars).to_i})
+    if @location.image.attached?
+      location = location.merge({image: @location.image.service_url})
+    end
+    rawComment = Comment.includes(:user).where(location_id: @location.id)
+    if rawComment.length==0 
+      comments = [0]
+    else 
+      comments = rawComment.map do |c|
+        comment = c.as_json
+        comment = comment.merge({username: c.user.username})
+      end
+    end
+    render json: {location: location, comments: comments}, status: 200
   end
+
 
   def create
     location = Location.new(location_params)
@@ -26,7 +49,7 @@ class LocationsController < ApplicationController
 
   def update
     if @location.update(location_params)
-      render json: "location updated", status: :no_content
+      render json: "location updated", status: :ok
     else
       render json: { errors: @location.errors.full_messages },
              status: :unprocessable_entity
@@ -34,7 +57,7 @@ class LocationsController < ApplicationController
   end  
   def destroy
     @location.destroy
-    render json: "location deleted", status: :no_content
+    render json: "location deleted", status: :ok
   end
 
   private

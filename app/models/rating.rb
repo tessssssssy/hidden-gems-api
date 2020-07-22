@@ -1,4 +1,4 @@
 class Rating < ApplicationRecord
   belongs_to :user
-  belongs_to :locaton
+  belongs_to :location
 end

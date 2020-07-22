@@ -72,7 +72,7 @@ RSpec.describe "Locations", type: :request do
       end
 
       it 'has a http no content response status' do
-        expect(response).to have_http_status(:no_content)
+        expect(response).to have_http_status(:ok)
       end
 
       it 'updates the location in the database' do
@@ -104,7 +104,7 @@ RSpec.describe "Locations", type: :request do
     end
 
     it 'has a http no content response status' do
-      expect(response).to have_http_status(:no_content)
+      expect(response).to have_http_status(:ok)
     end
 
     it 'removes the location from the database' do
