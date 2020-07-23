@@ -6,6 +6,7 @@ class User < ApplicationRecord
     username = request.params['auth'] && request.params['auth']['username'] or email = request.params['auth'] && request.params['auth']['email']
     self.find_by username: username or self.find_by email: email
     end
+  has_many :locations
   has_many :comments
   has_many :likes
   has_many :ratings
