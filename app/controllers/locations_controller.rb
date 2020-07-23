@@ -47,8 +47,14 @@ class LocationsController < ApplicationController
   end
 
   def update
-    if @location.update(location_params)
-      render json: "location updated", status: :ok
+    
+    location_attributes = location_params.to_hash
+    if !location_attributes[:image]
+      location_attributes[:image] = @location.image_attachment.blob
+    end
+
+    if @location.update(location_attributes)
+      render json: { location: @location, image: url_for(location.image) }, status: :ok
     else
       render json: { errors: @location.errors.full_messages },
              status: :unprocessable_entity
