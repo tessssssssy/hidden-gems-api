@@ -8,7 +8,7 @@ class CommentsController < ApplicationController
       comments = [0]
     else 
       comments = rawComment.map do |c|
-        {id: c.id, body: c.body, user: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
+        {id: c.id, body: c.body, username: c.user.username, created_at: c.created_at, thread_id: c.thread_id}
       end
     end
     render json: comments, status: 200

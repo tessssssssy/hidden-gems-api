@@ -7,7 +7,7 @@ class LocationsController < ApplicationController
 
     @locations = rawLocation.map do |l|
       location = l.as_json
-      location = location.merge({ratings: l.ratings.average(:stars).to_i, user: l.user.username})
+      location = location.merge({ratings: l.ratings.average(:stars).to_i, username: l.user.username})
       if l.image.attached?
         location = location.merge({image: l.image.service_url})
       end
@@ -18,7 +18,7 @@ class LocationsController < ApplicationController
 
   def show
     location = @location.as_json
-    location = location.merge({ratings: @location.ratings.average(:stars).to_i, user: @location.user.username})
+    location = location.merge({ratings: @location.ratings.average(:stars).to_i, username: @location.user.username})
     if @location.image.attached?
       location = location.merge({image: @location.image.service_url})
     end
