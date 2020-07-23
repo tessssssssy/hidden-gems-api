@@ -1,5 +1,5 @@
 class LocationsController < ApplicationController
-  # before_action :authenticate_user, only: [:create, :update, :destroy]
+  before_action :authenticate_user, only: [:create, :update, :destroy]
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
@@ -33,9 +33,8 @@ class LocationsController < ApplicationController
     render json: {location: location, comments: comments}, status: 200
   end
 
-
   def create
-    location = Location.new(location_params)
+    location = current_user.locations.new(location_params)
     if location.save
       if location_params[:image]
         render json: { location: location, image: url_for(location.image) }, status: :created
