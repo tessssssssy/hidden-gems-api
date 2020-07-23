@@ -3,10 +3,11 @@ class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
-    rawLocation = Location.all.order(id: "desc").includes(:ratings).with_attached_image
+    rawLocation = Location.all.order(id: "desc").includes(:ratings, :user).with_attached_image
+
     @locations = rawLocation.map do |l|
       location = l.as_json
-      location = location.merge({ratings: l.ratings.average(:stars).to_i})
+      location = location.merge({ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username})
       if l.image.attached?
         location = location.merge({image: l.image.service_url})
       end
@@ -17,7 +18,7 @@ class LocationsController < ApplicationController
 
   def show
     location = @location.as_json
-    location = location.merge({ratings: @location.ratings.average(:stars).to_i})
+    location = location.merge({ratings: @location.ratings.average(:stars).to_i, numberOfRatings: @location.ratings.count, username: @location.user.username})
     if @location.image.attached?
       location = location.merge({image: @location.image.service_url})
     end
