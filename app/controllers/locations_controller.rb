@@ -3,25 +3,22 @@ class LocationsController < ApplicationController
   before_action :set_location, only: [:show, :update, :destroy]
 
   def index
-    rawLocation = Location.all.order(id: "desc").includes(:ratings, :user).with_attached_image
-
+    rawLocation = Location.all.order(id: "desc").includes(:ratings, :user)
     @locations = rawLocation.map do |l|
+      photos = Photo.where(location_id: l.id)
+      photos = generate_image_urls(photos)
       location = l.as_json
-      location = location.merge({ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username})
-      if l.image.attached?
-        location = location.merge({image: l.image.service_url})
-      end
-      location
+      location = location.merge({photos: photos, ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username})
     end
     render json: @locations, status: 200
   end
 
   def show
     location = @location.as_json
-    location = location.merge({ratings: @location.ratings.average(:stars).to_i, numberOfRatings: @location.ratings.count, username: @location.user.username})
-    if @location.image.attached?
-      location = location.merge({image: @location.image.service_url})
-    end
+    photos = Photo.where(location_id: @location.id)
+    photos = generate_image_urls(photos)
+    location = location.merge({photos: photos, ratings: @location.ratings.average(:stars).to_i, numberOfRatings: @location.ratings.count, username: @location.user.username})
+    
     rawComment = Comment.includes(:user).where(location_id: @location.id)
     if rawComment.length==0 
       comments = [0]
@@ -35,20 +32,16 @@ class LocationsController < ApplicationController
   end
 
   def create
-    location = current_user.locations.new(location_params)
+    location = current_user.locations.new(location_params) #.merge(location_id: new_location.id) .merge(photo_params)
     if location.save
-      if location_params[:image]
-        render json: { location: location, image: url_for(location.image) }, status: :created
-      else
-        render json: { location: location, image: '' }, status: :created
-      end
+      photo = current_user.photos.create(location_id: location.id, image: params[:location][:image])
+        render json: { location: location, image: url_for(photo.image) }, status: :created
     else
       render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  def update
-    
+  def update  
     location_attributes = location_params.to_hash
     if !location_attributes[:image]
       location_attributes[:image] = @location.image_attachment.blob
@@ -61,6 +54,7 @@ class LocationsController < ApplicationController
              status: :unprocessable_entity
     end
   end  
+
   def destroy
     @location.destroy
     render json: "location deleted", status: :ok
@@ -69,7 +63,11 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude, :image)
+    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude)
+  end
+
+  def photo_params
+    params.require(:photo).permit(:image)
   end
 
   def set_location
