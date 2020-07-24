@@ -34,7 +34,7 @@ class LocationsController < ApplicationController
   def create
     location = current_user.locations.new(location_params) #.merge(location_id: new_location.id) .merge(photo_params)
     if location.save
-      photo = current_user.photos.create(location_id: location.id, image: params[:location][:image])
+      photo = current_user.photos.create(location_id: location.id, image: params[:location][:image], main: true)
         render json: { location: location, image: url_for(photo.image) }, status: :created
     else
       render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
@@ -42,13 +42,14 @@ class LocationsController < ApplicationController
   end
 
   def update  
-    location_attributes = location_params.to_hash
-    if !location_attributes[:image]
-      location_attributes[:image] = @location.image_attachment.blob
+    # location_attributes = location_params.to_hash
+    photo = Photo.where(location_id: params[:id], main: true)
+    image = params[:location][:image]
+    if !image
+      image = photo.image_attachment.blob
     end
-
-    if @location.update(location_attributes)
-      render json: { location: @location, image: url_for(location.image) }, status: :ok
+    if @location.update(location_params) && photo.update(image: image)
+      render json: { location: @location, image: url_for(photo.image) }, status: :ok
     else
       render json: { errors: @location.errors.full_messages },
              status: :unprocessable_entity
