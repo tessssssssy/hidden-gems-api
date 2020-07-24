@@ -13,8 +13,8 @@ class PhotosController < ApplicationController
     end
 
     def create
-        byebug
         photo = current_user.photos.new(photo_params)
+        photo.location_id = params[:location_id]
         if photo.save
             render json: { photo: photo, image: url_for(photo.image) }, status: :created
           else
@@ -30,7 +30,7 @@ class PhotosController < ApplicationController
     private
 
     def photo_params
-        params.require(:photo).permit(:location_id, :image)
+        params.require(:photo).permit(:image)
     end
     
     def set_photo
