@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get "/status", to: "status#index"
   get "/status/user", to: "status#user"
   resources :locations do
+    resources :photos
     resources :comments
     resources :ratings, only: :create
   end
