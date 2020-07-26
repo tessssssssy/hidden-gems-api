@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_24_040622) do
+ActiveRecord::Schema.define(version: 2020_07_26_135545) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,6 +73,8 @@ ActiveRecord::Schema.define(version: 2020_07_24_040622) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "tagline"
     t.bigint "user_id", null: false
+    t.bigint "category_id"
+    t.index ["category_id"], name: "index_locations_on_category_id"
     t.index ["user_id"], name: "index_locations_on_user_id"
   end
 
@@ -110,6 +112,7 @@ ActiveRecord::Schema.define(version: 2020_07_24_040622) do
   add_foreign_key "comments", "users"
   add_foreign_key "likes", "locations"
   add_foreign_key "likes", "users"
+  add_foreign_key "locations", "categories"
   add_foreign_key "locations", "users"
   add_foreign_key "photos", "locations"
   add_foreign_key "photos", "users"
