@@ -17,7 +17,7 @@ User.create(
   admin: true
 )
 
-categories = ["art","photography","nature","other"]
+categories = ["art","photography","nature"]
 
 categories.each do |c|
   Category.create(name: c)
