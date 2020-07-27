@@ -3,9 +3,14 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
+    message = nil
     if params[:lon]
       km = params[:km] || 15
       rawLocation = Location.near([params[:lat].to_f,params[:lon].to_f],km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
+      if rawLocation.length===0
+        message="No result found"
+        rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
+      end
     else
       rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
     end
@@ -15,7 +20,7 @@ class LocationsController < ApplicationController
       location = l.as_json
       location = location.merge({ photos: photos, ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username })
     end
-    render json: @locations, status: 200
+    render json: {locations: @locations, message: message}, status: 200
   end
 
   def show
