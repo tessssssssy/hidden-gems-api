@@ -3,7 +3,11 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
-    rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
+    if params[:search]
+      rawLocation = Location.where([params[:search][:lat],params[:search][:lon]],12, units: :km).order(id: 'desc').includes(:ratings, :user)
+    else
+      rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
+    end
     @locations = rawLocation.map do |l|
       photos = Photo.where(location_id: l.id)
       photos = generate_image_urls(photos)
