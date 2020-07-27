@@ -3,6 +3,7 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
+    p params
     rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
     @locations = rawLocation.map do |l|
       photos = Photo.where(location_id: l.id)
