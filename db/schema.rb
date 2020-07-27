@@ -73,7 +73,7 @@ ActiveRecord::Schema.define(version: 2020_07_26_135545) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "tagline"
     t.bigint "user_id", null: false
-    t.bigint "category_id"
+    t.bigint "category_id", null: false
     t.index ["category_id"], name: "index_locations_on_category_id"
     t.index ["user_id"], name: "index_locations_on_user_id"
   end
