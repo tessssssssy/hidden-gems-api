@@ -4,9 +4,9 @@ class LocationsController < ApplicationController
 
   def index
     message = nil
-    if params[:lon]
+    if params[:longitude]
       km = params[:km] || 15
-      rawLocation = Location.near([params[:lat].to_f,params[:lon].to_f],km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
+      rawLocation = Location.near([params[:latitude].to_f,params[:longitude].to_f],km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
       if rawLocation.length===0
         message="No result found"
         rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
