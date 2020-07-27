@@ -3,12 +3,12 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
-    message = nil
+    errors = nil
     if params[:longitude]
       km = params[:km] || 15
-      rawLocation = Location.near([params[:latitude].to_f,params[:longitude].to_f],km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
-      if rawLocation.length===0
-        message="No result found"
+      rawLocation = Location.near([params[:latitude].to_f, params[:longitude].to_f], km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
+      if rawLocation.length === 0
+        errors = 'No result found'
         rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
       end
     else
@@ -20,7 +20,7 @@ class LocationsController < ApplicationController
       location = l.as_json
       location = location.merge({ photos: photos, ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username })
     end
-    render json: {locations: @locations, message: message}, status: 200
+    render json: { locations: @locations, errors: errors }, status: 200
   end
 
   def show
@@ -37,39 +37,41 @@ class LocationsController < ApplicationController
         comment = c.as_json
         comment = comment.merge({ username: c.user.username })
       end
-                   end
+    end
     render json: { location: location, comments: comments }, status: 200
   end
 
   def create
-    @location = current_user.locations.new(location_params)
-    if @location.save
-      photo = current_user.photos.new(location_id: @location.id, image: params[:location][:image], main: true)
-      if photo.save
-        location = @location.as_json
-        location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
-        render json: { location: location }, status: :created
-      else
-        location.destroy
-        render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
-      end
+    if params[:location][:image] === 'undefined'
+      render json: { errors: 'No photo attached' }, status: :unprocessable_entity
     else
-      render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
+      @location = current_user.locations.new(location_params)
+      if @location.save
+        photo = current_user.photos.new(location_id: @location.id, image: params[:location][:image], main: true)
+        if photo.save
+          location = @location.as_json
+          location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
+          render json: { location: location }, status: :created
+        else
+          location.destroy
+          render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
+        end
+      else
+        render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
+        end
     end
   end
 
   def update
     photo = Photo.find_by(location_id: params[:id], main: true)
     image = params[:location][:image]
-    image = photo.image_attachment.blob if image ==="undefined"
-    byebug
+    image = photo.image_attachment.blob if image === 'undefined'
     if @location.update(location_params) && photo.update(image: image)
       location = @location.as_json
       location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
       render json: { location: location }, status: :ok
     else
-      render json: { errors: @location.errors.full_messages },
-      status: :unprocessable_entity
+      render json: { errors: @location.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
