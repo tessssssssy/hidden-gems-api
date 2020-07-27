@@ -1,14 +1,14 @@
 class LocationsController < ApplicationController
-  before_action :authenticate_user, only: [:create, :update, :destroy]
-  before_action :set_location, only: [:show, :update, :destroy]
+  before_action :authenticate_user, only: %i[create update destroy]
+  before_action :set_location, only: %i[show update destroy]
 
   def index
-    rawLocation = Location.all.order(id: "desc").includes(:ratings, :user)
+    rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
     @locations = rawLocation.map do |l|
       photos = Photo.where(location_id: l.id)
       photos = generate_image_urls(photos)
       location = l.as_json
-      location = location.merge({photos: photos, ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username})
+      location = location.merge({ photos: photos, ratings: l.ratings.average(:stars).to_i, numberOfRatings: l.ratings.count, username: l.user.username })
     end
     render json: @locations, status: 200
   end
@@ -17,48 +17,55 @@ class LocationsController < ApplicationController
     location = @location.as_json
     photos = Photo.where(location_id: @location.id)
     photos = generate_image_urls(photos)
-    location = location.merge({photos: photos, ratings: @location.ratings.average(:stars).to_i, numberOfRatings: @location.ratings.count, username: @location.user.username})
-    
+    location = location.merge({ photos: photos, ratings: @location.ratings.average(:stars).to_i, numberOfRatings: @location.ratings.count, username: @location.user.username })
+
     rawComment = Comment.includes(:user).where(location_id: @location.id)
-    if rawComment.length==0 
+    if rawComment.empty?
       comments = [0]
-    else 
-      comments = rawComment.map do |c|
+    else
+      rawComment.map do |c|
         comment = c.as_json
-        comment = comment.merge({username: c.user.username})
+        comment = comment.merge({ username: c.user.username })
       end
-    end
-    render json: {location: location, comments: comments}, status: 200
+                   end
+    render json: { location: location, comments: comments }, status: 200
   end
 
   def create
-    location = current_user.locations.new(location_params) #.merge(location_id: new_location.id) .merge(photo_params)
-    if location.save
-      photo = current_user.photos.create(location_id: location.id, image: params[:location][:image], main: true)
-        render json: { location: location, image: url_for(photo.image) }, status: :created
+    @location = current_user.locations.new(location_params)
+    if @location.save
+      photo = current_user.photos.new(location_id: @location.id, image: params[:location][:image], main: true)
+      if photo.save
+        location = @location.as_json
+        location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
+        render json: { location: location }, status: :created
+      else
+        location.destroy
+        render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
+      end
     else
       render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  def update  
-    # location_attributes = location_params.to_hash
-    photo = Photo.where(location_id: params[:id], main: true)
+  def update
+    photo = Photo.find_by(location_id: params[:id], main: true)
     image = params[:location][:image]
-    if !image
-      image = photo.image_attachment.blob
-    end
+    image = photo.image_attachment.blob if image ==="undefined"
+    byebug
     if @location.update(location_params) && photo.update(image: image)
-      render json: { location: @location, image: url_for(photo.image) }, status: :ok
+      location = @location.as_json
+      location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
+      render json: { location: location }, status: :ok
     else
       render json: { errors: @location.errors.full_messages },
-             status: :unprocessable_entity
+      status: :unprocessable_entity
     end
-  end  
+  end
 
   def destroy
     @location.destroy
-    render json: "location deleted", status: :ok
+    render json: 'location deleted', status: :ok
   end
 
   private
@@ -75,15 +82,9 @@ class LocationsController < ApplicationController
     @location = Location.find(params[:id])
   end
 
-  def generate_image_urls(locations)
-    locations.map do |location|
-      if location.image.attached?
-        location.attributes.merge(image: url_for(location.image))
-      else
-        location
-      end
+  def generate_image_urls(photos)
+    photos.map do |photo|
+      photo.attributes.merge(image: url_for(photo.image))
     end
   end
 end
-
-
