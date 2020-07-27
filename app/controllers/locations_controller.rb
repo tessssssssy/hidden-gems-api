@@ -49,18 +49,17 @@ class LocationsController < ApplicationController
   end
 
   def update
-    photo = Photo.where(location_id: params[:id], main: true)
-    byebug
+    photo = Photo.find_by(location_id: params[:id], main: true)
     image = params[:location][:image]
+    image = photo.image_attachment.blob if image ==="undefined"
     byebug
-    image ||= photo.image_attachment.blob
     if @location.update(location_params) && photo.update(image: image)
       location = @location.as_json
-      location = location.merge({ photos: [url_for(photo.image)], username: location.user.username })
+      location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
       render json: { location: location }, status: :ok
     else
       render json: { errors: @location.errors.full_messages },
-             status: :unprocessable_entity
+      status: :unprocessable_entity
     end
   end
 
