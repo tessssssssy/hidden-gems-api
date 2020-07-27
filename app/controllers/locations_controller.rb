@@ -3,8 +3,9 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
-    if params[:search]
-      rawLocation = Location.where([params[:search][:lat],params[:search][:lon]],12, units: :km).order(id: 'desc').includes(:ratings, :user)
+    if params[:lon]
+      km = params[:km] || 15
+      rawLocation = Location.near([params[:lat].to_f,params[:lon].to_f],km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
     else
       rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
     end
