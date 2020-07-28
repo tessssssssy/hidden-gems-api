@@ -5,4 +5,5 @@ class Location < ApplicationRecord
     has_many :likes, dependent: :destroy
     has_many :ratings, dependent: :destroy
     has_many :photos, dependent: :destroy
+    geocoded_by :address
 end
