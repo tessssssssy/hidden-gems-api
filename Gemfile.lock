@@ -212,10 +212,7 @@ DEPENDENCIES
   byebug
   database_cleaner
   factory_bot_rails
-<<<<<<< HEAD
-=======
   geocoder (~> 1.6)
->>>>>>> 6b79de3adbe95b21eb5c013c582b04ee311356c2
   knock!
   listen (~> 3.2)
   pg (>= 0.18, < 2.0)

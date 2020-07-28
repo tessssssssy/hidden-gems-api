@@ -3,10 +3,6 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
-<<<<<<< HEAD
-    p params
-    rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
-=======
     errors = nil
     if params[:longitude]
       km = params[:km] || 15
@@ -18,7 +14,6 @@ class LocationsController < ApplicationController
     else
       rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
     end
->>>>>>> 6b79de3adbe95b21eb5c013c582b04ee311356c2
     @locations = rawLocation.map do |l|
       photos = Photo.where(location_id: l.id)
       photos = generate_image_urls(photos)
@@ -88,7 +83,7 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude)
+    params.require(:location).permit(:name, :description, :tagline, :address, :longitude, :latitude, :category)
   end
 
   def photo_params
