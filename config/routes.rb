@@ -7,6 +7,5 @@ Rails.application.routes.draw do
     resources :photos
     resources :comments
     resources :ratings, only: :create
-    resources :likes, expect: :update
   end
 end
