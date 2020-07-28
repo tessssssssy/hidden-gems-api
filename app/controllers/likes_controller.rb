@@ -6,9 +6,10 @@ class LikesController < ApplicationController
   end
 
   def create
+    existinglike = current_user.likes.find_by(location_id: params[:location_id])
+    if !existinglike
     like = current_user.likes.new(location_id: params[:location_id])
-    if like.save
-        render status: :created
+      render status: :created if like.save
     else
       render status: :no_content
     end

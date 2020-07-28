@@ -6,6 +6,8 @@ class StatusController < ApplicationController
   end
 
   def user
-    render json: { user: current_user.username }
+    likes = Like.where(user_id: current_user.id).pluck(:location_id)
+    ratings = current_user.ratings
+    render json: { user: current_user.username, likes: likes, ratings: ratings }
   end
 end
