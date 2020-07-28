@@ -3,9 +3,12 @@ Rails.application.routes.draw do
   post "/login", to: "user_token#create"
   get "/status", to: "status#index"
   get "/status/user", to: "status#user"
+
   resources :locations do
     resources :photos
     resources :comments
     resources :ratings, only: :create
+    resources :likes, except: [:show, :update, :destroy]
+  delete "/likes", to: "likes#destroy"
   end
 end
