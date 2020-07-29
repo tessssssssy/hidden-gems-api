@@ -42,6 +42,7 @@ class LocationsController < ApplicationController
   end
 
   def create
+    p location_params
     if params[:location][:image] === 'undefined'
       render json: { errors: 'No photo attached' }, status: :unprocessable_entity
     else
