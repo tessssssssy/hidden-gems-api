@@ -3,13 +3,14 @@ class LocationsController < ApplicationController
   before_action :set_location, only: %i[show update destroy]
 
   def index
+    p params
     errors = nil
     if params[:longitude]
       km = params[:km] || 15
       rawLocation = Location.near([params[:latitude].to_f, params[:longitude].to_f], km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
       if rawLocation.length === 0
         errors = 'No result found'
-        rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
+        # rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
       end
     else
       rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
@@ -42,7 +43,6 @@ class LocationsController < ApplicationController
   end
 
   def create
-    p location_params
     if params[:location][:image] === 'undefined'
       render json: { errors: 'No photo attached' }, status: :unprocessable_entity
     else
@@ -54,12 +54,12 @@ class LocationsController < ApplicationController
           location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
           render json: { location: location }, status: :created
         else
-          @location.destroy
+          location.destroy
           render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
         end
       else
-        render json: { errors: @location.errors.full_messages }, status: :unprocessable_entity
-      end
+        render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
+        end
     end
   end
 
