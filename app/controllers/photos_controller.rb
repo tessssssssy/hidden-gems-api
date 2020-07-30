@@ -9,14 +9,14 @@ class PhotosController < ApplicationController
     end
 
     def show
-        render json: photo.merge({image: image.service_url})
+        render json: photo.merge({image: image.service_url, username: photo.user.username})
     end
 
     def create
         photo = current_user.photos.new(photo_params)
         photo.location_id = params[:location_id]
         if photo.save
-            render json: { photo: photo, image: url_for(photo.image)}, status: :created
+            render json: { photo: photo, image: url_for(photo.image), username: photo.user.username}, status: :created
           else
             render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
         end
@@ -39,7 +39,7 @@ class PhotosController < ApplicationController
 
     def generate_image_urls(photos)
         photos.map do |photos|
-            photo.attributes.merge(image: url_for(photo.image))
+            photo.attributes.merge(image: url_for(photo.image), username: photo.user.username)
         end
     end
 end
