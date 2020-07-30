@@ -3,22 +3,27 @@ require 'rails_helper'
 RSpec.describe "Locations", type: :request do
   describe 'GET #index' do
     before(:example) do
-      @first_location = create(:location)
-      @last_location = create(:location)
+      @user = create(:user)
+      @first_location = create(:location, user_id: @user.id)
+      @last_location = create(:location, user_id: @user.id)
+      @photo = create(:photo, user_id: @user.id, location_id: @first_location.id)
+      @photo.image.attach(io: File.open(Rails.root.join('spec', 'factories', 'images', 'icon.jpg')), filename: 'icon.jpg', content_type: 'image/jpeg')
+      @photol = create(:photo, user_id: @user.id, location_id: @last_location.id)
+      @photol.image.attach(io: File.open(Rails.root.join('spec', 'factories', 'images', 'icon.jpg')), filename: 'icon.jpg', content_type: 'image/jpeg')
       get '/locations'
       @json_response = JSON.parse(response.body)
     end
 
     it 'returns http success' do
-      expect(response).to have_http_status(:success)
+      expect(response).to have_http_status(200)
     end
 
     it 'JSON response contains the correct number of entries' do
-      expect(@json_response.count).to eq(2)
+      expect(@json_response["locations"].length).to eq(2)
     end
 
     it 'JSON response body contains expected attributes' do
-      expect(@json_response[0]).to include({
+      expect(@json_response["locations"][0]).to include({
         'name' => @first_location.name,
         'tagline' => @first_location.tagline,
         'description' => @first_location.description,
@@ -29,7 +34,8 @@ RSpec.describe "Locations", type: :request do
   describe 'POST #create' do
     context 'when the location is valid' do
       before(:example) do
-        @location_params = attributes_for(:location)
+        @user = User.create(username:"T",password:"pwd",email:"t@t.com")
+        @location_params = attributes_for(:location).merge(user_id: @user.id)
         post '/locations', params: { location: @location_params }, headers: authenticated_header
       end
 
@@ -44,6 +50,7 @@ RSpec.describe "Locations", type: :request do
 
     context 'when the location has invalid attributes' do
       before(:example) do
+        @user = build(:user)
         @location_params = attributes_for(:location, :invalid)
         post '/locations', params: { location: @location_params }, headers: authenticated_header
         @json_response = JSON.parse(response.body)
@@ -66,12 +73,13 @@ RSpec.describe "Locations", type: :request do
   describe 'PUT #update' do
     context 'when the params are valid' do
       before(:example) do
-        @location = create(:location)
+        @user = User.create(username:"T",password:"pwd",email:"t@t.com")
+        @location = create(:location, user_id: @user.id)
         @updated_name = 'Updated location'
         put "/locations/#{@location.id}", params: { location: { name: @updated_name } }, headers: authenticated_header
       end
 
-      it 'has a http no content response status' do
+      it 'has a http ok response status' do
         expect(response).to have_http_status(:ok)
       end
 
@@ -82,7 +90,8 @@ RSpec.describe "Locations", type: :request do
 
     context 'when the params are invalid' do
       before(:example) do
-        @location = create(:location)
+        @user = User.create(username:"T",password:"pwd",email:"t@t.com")
+        @location = create(:location, user_id: @user.id)
         put "/locations/#{@location.id}", params: { location: { name: nil } }, headers: authenticated_header
         @json_response = JSON.parse(response.body)
       end
@@ -99,8 +108,9 @@ RSpec.describe "Locations", type: :request do
 
   describe 'DELETE #destroy' do
     before(:example) do
-      location = create(:location)
-      delete "/locations/#{location.id}", headers: authenticated_header
+        @user = User.create(username:"T",password:"pwd",email:"t@t.com")
+        @location = create(:location, user_id: @user.id)
+      delete "/locations/#{@location.id}", headers: authenticated_header
     end
 
     it 'has a http no content response status' do

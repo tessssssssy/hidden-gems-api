@@ -6,7 +6,6 @@ FactoryBot.define do
     address { "Somewhere" }
     latitude { 1.5 }
     longitude { 1.5 }
-
         trait :invalid do
       name {nil}
     end

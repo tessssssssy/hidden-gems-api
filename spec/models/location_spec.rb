@@ -1,7 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe Location, type: :model do
-  subject {build(:location)}
+  before(:example) do
+    @user = create(:user)
+  end
+  subject {build(:location, user_id: @user.id)}
   # subject { described_class.new(
   #   name: 'Test Location',
   #   tagline: 'dkajsncjadns',
