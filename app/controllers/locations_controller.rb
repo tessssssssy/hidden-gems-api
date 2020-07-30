@@ -96,7 +96,7 @@ class LocationsController < ApplicationController
 
   def generate_image_urls(photos)
     photos.map do |photo|
-      photo.attributes.merge(image: url_for(photo.image))
+      photo.attributes.merge(image: url_for(photo.image), username: photo.user.username)
     end
   end
 end
