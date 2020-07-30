@@ -6,11 +6,10 @@ class LocationsController < ApplicationController
     p params
     errors = nil
     if params[:longitude]
-      km = params[:km] || 15
+      km = params[:km] || 50
       rawLocation = Location.near([params[:latitude].to_f, params[:longitude].to_f], km.to_i, units: :km).order(id: 'desc').includes(:ratings, :user)
       if rawLocation.length === 0
         errors = 'No result found'
-        # rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
       end
     else
       rawLocation = Location.all.order(id: 'desc').includes(:ratings, :user)
