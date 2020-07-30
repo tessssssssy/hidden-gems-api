@@ -16,7 +16,7 @@ class PhotosController < ApplicationController
         photo = current_user.photos.new(photo_params)
         photo.location_id = params[:location_id]
         if photo.save
-            render json: { photo: photo, image: url_for(photo.image) }, status: :created
+            render json: { photo: photo, image: url_for(photo.image)}, status: :created
           else
             render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
         end
