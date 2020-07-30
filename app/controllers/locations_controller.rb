@@ -54,12 +54,12 @@ class LocationsController < ApplicationController
           location = location.merge({ photos: [url_for(photo.image)], username: @location.user.username })
           render json: { location: location }, status: :created
         else
-          location.destroy
+          @location.destroy
           render json: { errors: photo.errors.full_messages }, status: :unprocessable_entity
         end
       else
-        render json: { errors: location.errors.full_messages }, status: :unprocessable_entity
-        end
+        render json: { errors: @location.errors.full_messages }, status: :unprocessable_entity
+      end
     end
   end
 
